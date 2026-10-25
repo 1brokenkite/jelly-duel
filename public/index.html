@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f3f4f6">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='2' y='2' width='28' height='28' rx='9' fill='%23b9a6ec'/%3E%3C/svg%3E">
+  <title>软糖方块 · Jelly Duel</title>
+  <style>
+    /* 全部使用本地样式和系统字体，无需下载字体或访问外部 CDN。 */
+    :root { color-scheme:light; --bg:#f3f4f6; --panel:#ffffff; --ink:#303645; --muted:#7b8393; --line:#e9ebf1; --board:#f6f7fa; --accent:#7867ca; --soft:#efebff; --shadow:0 12px 40px #313a4e06; }
+    :root[data-theme="dark"] { color-scheme:dark; --bg:#171b27; --panel:#222838; --ink:#eceef8; --muted:#a3abc0; --line:#343c50; --board:#1b2030; --accent:#c0b0ff; --soft:#38304f; --shadow:0 12px 40px #0002; }
+    * { box-sizing:border-box; }
+    [hidden] { display:none !important; }
+    body { margin:0; background:var(--bg); color:var(--ink); font:14px/1.5 "Segoe UI","Microsoft YaHei",sans-serif; }
+    button,input { font:inherit; }
+    button { cursor:pointer; -webkit-tap-highlight-color:transparent; }
+    button:disabled { cursor:default; opacity:.5; }
+    button:focus-visible,input:focus-visible { outline:3px solid #b6a8ec; outline-offset:4px; }
+    button { color:var(--ink); }
+    .shell { max-width:1140px; margin:auto; padding:26px 32px 20px; }
+    .topbar,.brand,.top-actions,.arena-heading,.player-heading,.player-name,.status { display:flex; align-items:center; }
+    .topbar { justify-content:space-between; padding-bottom:25px; border-bottom:1px solid var(--line); }
+    .brand { gap:12px; }
+    .brand-mark { display:grid; grid-template-columns:repeat(2,12px); gap:3px; transform:rotate(-9deg); }
+    .brand-mark i { width:12px; height:12px; border-radius:4px; background:#b9a6ec; box-shadow:inset 0 2px 3px #fff8; }
+    .brand-mark i:nth-child(2) { background:#8fd4cf; }.brand-mark i:nth-child(3) { background:#efbdc8; }
+    .brand strong { display:block; font-size:19px; letter-spacing:1px; }
+    .eyebrow { color:var(--muted); font-size:10px; font-weight:700; letter-spacing:2px; }
+    .top-actions { gap:14px; }
+    .pill { padding:5px 11px; background:var(--panel); border:1px solid var(--line); border-radius:20px; font-size:11px; color:var(--muted); }
+    .icon-button { border:1px solid var(--line); background:var(--panel); border-radius:12px; width:36px; height:36px; font-size:17px; }
+    .arena-heading { justify-content:space-between; margin:24px 0 18px; gap:12px; }
+    h1 { margin:0 0 4px; font-size:22px; font-weight:650; letter-spacing:.5px; }
+    p { margin:0; }.subtitle { color:var(--muted); font-size:12px; }
+    .arena-heading > div:first-child { min-width:0; flex:1; }
+    .toolbar { display:flex; gap:8px; flex-shrink:0; }
+    .quiet-button { border:1px solid var(--line); background:var(--panel); border-radius:10px; padding:8px 12px; font-size:12px; white-space:nowrap; }
+    .arena { display:grid; grid-template-columns:minmax(0,1fr) 166px minmax(0,1fr); gap:22px; align-items:start; }
+    .player-panel { border:1px solid var(--line); background:var(--panel); border-radius:22px; padding:18px; box-shadow:var(--shadow); }
+    .player-heading { justify-content:space-between; margin-bottom:16px; }
+    .player-name { gap:9px; font-size:13px; font-weight:650; }
+    .avatar { display:grid; place-items:center; width:30px; height:30px; border-radius:10px; color:#6b5a9a; background:#e9e2fa; font-size:11px; }
+    .avatar.mint { color:#4f8584; background:#dcefeb; }
+    .status { gap:5px; font-size:10px; color:var(--muted); }
+    .dot { width:6px; height:6px; border-radius:50%; background:#8fc5b4; }
+    .dot.idle { background:#c0c5d1; }
+    .board-wrap { position:relative; width:min(100%,270px); aspect-ratio:1/2; margin:auto; overflow:hidden; border:1px solid var(--line); border-radius:12px; background:var(--board); }
+    .board-wrap canvas { width:100%; height:100%; display:block; }
+    .board-cover { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; text-align:center; padding:12px; background:color-mix(in srgb,var(--board) 80%,transparent); }
+    .board-cover strong { font-size:14px; font-weight:500; }.board-cover span { font-size:11px; color:var(--muted); line-height:1.8; }
+    .waiting-symbol { width:42px; height:42px; border:1px dashed #bdc7cd; border-radius:14px; display:grid; place-items:center; color:#9badae; font-size:22px; margin-bottom:4px; }
+    .stats { display:grid; grid-template-columns:repeat(3,1fr); text-align:center; padding-top:15px; }
+    .stat + .stat { border-left:1px solid var(--line); }.stat small { color:var(--muted); display:block; font-size:10px; }.stat strong { display:block; font-size:20px; font-weight:600; font-variant-numeric:tabular-nums; }
+    .center-column { display:flex; flex-direction:column; align-items:stretch; gap:14px; text-align:center; padding-top:3px; }
+    .center-card { background:var(--panel); border:1px solid var(--line); border-radius:17px; padding:14px 10px; }
+    .center-label { color:var(--muted); font-size:10px; letter-spacing:1px; }
+    .timer { font-variant-numeric:tabular-nums; font-size:28px; font-weight:600; letter-spacing:2px; margin:4px 0; }
+    .match-label { color:var(--accent); font-size:11px; }
+    #next-canvas { display:block; width:116px; height:72px; margin:8px auto 0; }
+    #mini-canvas { display:block; width:74px; height:148px; margin:10px auto; border:1px solid var(--line); border-radius:6px; }
+    .mini-note { color:var(--muted); font-size:10px; }.network-value { display:block; font-size:17px; margin:3px 0; }
+    .room-tag { margin-top:3px; color:var(--muted); font-size:11px; font-variant-numeric:tabular-nums; }
+    .keyboard-help { display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:18px; padding-top:20px; color:var(--muted); font-size:11px; }
+    kbd { display:inline-block; min-width:22px; padding:2px 5px; margin-right:3px; text-align:center; background:var(--panel); border:1px solid var(--line); border-bottom-width:2px; border-radius:5px; font:11px inherit; }
+    .bottom-note { margin-top:16px; text-align:center; color:var(--muted); font-size:10px; letter-spacing:1px; }
+    .modal-layer { position:fixed; inset:0; z-index:10; display:grid; place-items:center; background:#1c243326; backdrop-filter:blur(7px); padding:20px; overflow:auto; }
+    .modal { width:min(100%,390px); margin:auto; background:var(--panel); border:1px solid var(--line); border-radius:26px; padding:30px; box-shadow:0 24px 100px #26334c1c; }
+    .modal-accent { display:flex; gap:5px; height:30px; margin-bottom:17px; }
+    .modal-accent i { display:block; height:24px; width:24px; border-radius:7px; background:linear-gradient(145deg,#ddcff9,#bba6e6); box-shadow:inset 0 2px 3px #fff9,0 4px 9px #bba6e62a; }
+    .modal-accent i:nth-child(2) { transform:translateY(-7px); background:linear-gradient(145deg,#c7eee9,#91cfc7); }
+    .modal-accent i:nth-child(3) { background:linear-gradient(145deg,#f9dae0,#eab8c5); }
+    h2 { margin:0 0 9px; font-size:26px; font-weight:650; }.modal-copy { font-size:12px; line-height:1.9; color:var(--muted); margin-bottom:22px; }
+    label { display:block; font-size:12px; margin-bottom:8px; }
+    .optional { color:var(--muted); font-size:10px; margin-left:5px; }
+    input { width:100%; background:var(--board); border:1px solid var(--line); border-radius:12px; padding:12px 15px; color:var(--ink); letter-spacing:10px; font-size:22px; font-variant-numeric:tabular-nums; }
+    input::placeholder { color:#b7bbca; }
+    .field-note { color:var(--muted); font-size:10px; margin:8px 0 20px; min-height:15px; }
+    .field-note.error { color:#c75c75; }
+    .primary-button,.secondary-button { width:100%; border:0; border-radius:12px; padding:13px 12px; font-size:13px; font-weight:600; }
+    .primary-button { background:#8672ce; color:white; box-shadow:0 5px 12px #8672ce20; }.primary-button:hover { background:#7761bf; }
+    .secondary-button { margin-top:9px; background:var(--soft); color:var(--accent); }.modal-foot { font-size:10px; color:var(--muted); text-align:center; margin-top:17px; }
+    .result-score { margin:20px 0; display:flex; justify-content:space-between; align-items:center; padding:15px; background:var(--board); border-radius:12px; }.result-score strong { font-size:26px; }
+    .result-preview { display:flex; gap:15px; align-items:center; margin-bottom:20px; color:var(--muted); font-size:11px; }
+    #result-canvas { width:48px; height:96px; border-radius:5px; border:1px solid var(--line); }
+    .countdown-number { font-size:64px !important; font-weight:650 !important; color:var(--accent); }
+    .touch-controls { display:none; position:fixed; z-index:5; bottom:0; left:0; right:0; gap:8px; padding:12px 15px calc(12px + env(safe-area-inset-bottom)); background:color-mix(in srgb,var(--panel) 85%,transparent); backdrop-filter:blur(12px); border-top:1px solid var(--line); }
+    .touch-controls button { flex:1; min-height:54px; border:1px solid var(--line); border-radius:14px; background:color-mix(in srgb,var(--soft) 40%,transparent); font-size:20px; touch-action:none; user-select:none; -webkit-user-select:none; }
+    .touch-controls button:last-child { flex:1.35; font-size:12px; color:var(--accent); }
+    .touch-controls button:active,.touch-controls button.pressed { background:var(--soft); transform:translateY(1px); }
+    .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+    @media (max-width:900px) { .shell { padding:20px; }.arena { gap:12px; grid-template-columns:minmax(0,1fr) 140px minmax(0,1fr); }.player-panel { padding:12px; } }
+    @media (max-width:700px) {
+      .shell { padding:17px 14px 105px; }.topbar { padding-bottom:16px; }.brand strong { font-size:17px; }.top-actions { gap:8px; }.pill { font-size:10px; }.eyebrow { font-size:8px; }
+      .arena-heading { margin:19px 0 14px; align-items:flex-start; }h1 { font-size:19px; }.subtitle { font-size:10px; max-width:200px; }.toolbar { gap:4px; }.quiet-button { padding:7px 9px; }
+      .arena { grid-template-columns:minmax(0,1fr) 98px; gap:10px; }.opponent-panel { display:none; }.player-panel { border-radius:16px; padding:10px; }.player-heading { margin-bottom:10px; }.avatar { width:24px; height:24px; border-radius:8px; }.player-name { font-size:11px; gap:6px; }.status { font-size:9px; }
+      .center-column { gap:8px; padding:0; }.center-card { padding:10px 5px; border-radius:13px; }.timer { font-size:21px; }.center-label { font-size:9px; }.match-label { font-size:10px; }#next-canvas { width:80px; height:54px; }#mini-canvas { width:54px; height:108px; margin:8px auto; }.network-value { font-size:14px; }.mini-note { font-size:9px; }.stat strong { font-size:17px; }.stats { padding-top:10px; }.stat small { font-size:9px; }.keyboard-help { display:none; }.bottom-note { font-size:9px; margin-top:12px; }.modal { padding:26px; }.touch-controls { display:flex; }
+    }
+    @media (pointer:coarse) { .touch-controls { display:flex; }.shell { padding-bottom:110px; }.keyboard-help { display:none; } }
+    @media (max-width:360px) { h1 { font-size:16px; letter-spacing:0; } }
+    @media (max-width:700px) and (max-height:740px) {
+      .board-wrap { width:min(100%,max(120px,calc((100svh - 360px) / 2))); }
+      .center-card { padding:8px 5px; }.center-column { gap:6px; }#mini-canvas { width:42px; height:84px; }
+      .center-card .timer { font-size:20px; margin:2px 0; }.arena-heading { margin:14px 0 10px; }.topbar { padding-bottom:12px; }.bottom-note { display:none; }
+    }
+    @media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto !important; } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><div><strong>软糖方块</strong><span class="eyebrow">JELLY DUEL</span></div></div>
+      <div class="top-actions"><span id="mode-badge" class="pill">双人对战 / 单人练习</span><button id="theme-button" class="icon-button" aria-label="切换深色模式" title="切换明暗主题">◐</button></div>
+    </header>
+    <main>
+      <div class="arena-heading"><div><h1>落下一点，快乐一点。</h1><p id="game-hint" class="subtitle">柔软的方块，刚刚好的挑战。</p></div><div class="toolbar"><button id="invite-button" class="quiet-button" hidden>邀请</button><button id="pause-button" class="quiet-button" disabled>暂停</button><button id="menu-button" class="quiet-button" disabled>退出</button></div></div>
+      <div class="arena">
+        <section class="player-panel" aria-label="我的战区">
+          <div class="player-heading"><div class="player-name"><span class="avatar">01</span>我的战区</div><span class="status"><i class="dot"></i><span id="self-status">准备就绪</span></span></div>
+          <div class="board-wrap"><canvas id="board-canvas" aria-label="我的俄罗斯方块棋盘"></canvas><div id="board-cover" class="board-cover" hidden><strong id="cover-title"></strong><span id="cover-description"></span><button id="resume-button" class="quiet-button" hidden>继续游戏</button></div></div>
+          <div class="stats"><div class="stat"><small>得分</small><strong id="score">0</strong></div><div class="stat"><small>消除行</small><strong id="lines">0</strong></div><div class="stat"><small>等级</small><strong id="level">1</strong></div></div>
+        </section>
+        <aside class="center-column" aria-label="比赛信息">
+          <div class="center-card"><div class="center-label" id="timer-label">练习时间</div><div id="timer" class="timer">00:00</div><div id="phase-label" class="match-label">等待开始</div><div id="room-tag" class="room-tag">SOLO / 单人</div></div>
+          <div class="center-card"><div class="center-label">下一个 · NEXT</div><canvas id="next-canvas" aria-label="下一个方块"></canvas></div>
+          <div class="center-card"><div class="center-label">对手缩影</div><canvas id="mini-canvas" aria-label="尚无对手的缩略棋盘"></canvas><p id="opponent-note" class="mini-note">尚无对手</p></div>
+          <div class="center-card"><div class="center-label">网络延迟</div><strong id="latency" class="network-value">—</strong><p id="network-note" class="mini-note">尚未连接</p></div>
+        </aside>
+        <section class="player-panel opponent-panel" aria-label="对手战区，尚未连接">
+          <div class="player-heading"><div class="player-name"><span class="avatar mint">02</span>对手战区</div><span class="status"><i id="opponent-dot" class="dot idle"></i><span id="opponent-status">未连接</span></span></div>
+          <div class="board-wrap"><canvas id="opponent-canvas" aria-label="尚无对手的棋盘"></canvas><div id="opponent-cover" class="board-cover"><div class="waiting-symbol" aria-hidden="true">＋</div><strong>为下一场相遇留个位置</strong><span>邀请朋友输入相同房间号<br>第二位玩家加入后立即开局</span></div></div>
+          <div class="stats"><div class="stat"><small>得分</small><strong id="opponent-score">—</strong></div><div class="stat"><small>消除行</small><strong id="opponent-lines">—</strong></div><div class="stat"><small>待入垃圾</small><strong id="opponent-garbage">—</strong></div></div>
+        </section>
+      </div>
+      <div class="keyboard-help"><span><kbd>←</kbd><kbd>→</kbd>移动</span><span><kbd>↑</kbd>旋转</span><span><kbd>↓</kbd>加速</span><span><kbd>Space</kbd>硬降</span><span><kbd>P</kbd>单人暂停</span></div>
+      <p class="bottom-note">TAKE YOUR TIME. FIND YOUR FLOW.</p>
+    </main>
+  </div>
+  <nav class="touch-controls" aria-label="触屏操作"><button data-action="left" aria-label="向左移动">←</button><button data-action="rotateCW" aria-label="顺时针旋转">↻</button><button data-action="softDrop" aria-label="向下加速">↓</button><button data-action="right" aria-label="向右移动">→</button><button data-action="hardDrop" aria-label="直接落到底部">硬降 ↓↓</button></nav>
+  <div id="menu-layer" class="modal-layer">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="menu-title">
+      <div class="modal-accent" aria-hidden="true"><i></i><i></i><i></i></div><div class="eyebrow">A LITTLE BREAK, A LITTLE PLAY</div><h2 id="menu-title">来一局，放轻松。</h2><p class="modal-copy">让每一块软糖找到自己的位置。<br>输入相同房间号，和朋友一起开局。</p>
+      <form id="start-form" novalidate><label for="room-input">房间号<span class="optional">双方输入相同的 4 位数字</span></label><input id="room-input" type="text" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" placeholder="0000" autocomplete="off" aria-describedby="room-note"><p id="room-note" class="field-note">第一位玩家创建房间，第二位加入即开始。</p><button type="submit" class="primary-button">进入双人房间 →</button></form>
+      <button id="solo-button" class="secondary-button">单人练习</button><button id="demo-button" class="secondary-button">体验消行动画</button><p class="modal-foot">键盘与触屏均可玩 · 无需登录</p>
+    </section>
+  </div>
+  <div id="result-layer" class="modal-layer" hidden>
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="result-title"><div class="modal-accent" aria-hidden="true"><i></i><i></i><i></i></div><div class="eyebrow">ONE MORE LITTLE MOMENT</div><h2 id="result-title">练习结束</h2><p id="result-copy" class="modal-copy"></p><div class="result-score"><span>本局得分</span><strong id="result-score">0</strong></div><div class="result-preview"><canvas id="result-canvas" aria-label="结算时的对手阵列，单人模式为空"></canvas><div>对手最终阵列<br><span id="result-opponent-note">单人模式 · 本局没有对手</span></div></div><p id="rematch-note" class="field-note" role="status"></p><button id="retry-button" class="primary-button">再来一局</button><button id="result-menu-button" class="secondary-button">返回主菜单</button></section>
+  </div>
+  <div id="announcement" class="sr-only" role="status" aria-live="polite"></div>
+  <script src="/socket.io/socket.io.js" defer></script>
+  <script src="/game.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+node_modules
+.git
+.codex
+.agents
+.env
+*.log
+artifacts
+test
+scripts
+deploy
+README.md
+DEPLOY.md
